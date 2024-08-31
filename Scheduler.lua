@@ -33,7 +33,7 @@ local function Scheduler()
 
   local function print_ready_tasks()
     for _, task in ipairs(tasks.ready) do
-      debug_print('- ' .. names[tostring(task)])
+      debug_print('- ' .. names[tostring(task.co)])
     end
   end
 
@@ -69,15 +69,15 @@ local function Scheduler()
         _current_msec = current_msec()
         if tasks.sleeping[1].wakeup <= _current_msec then
           local co = table.remove(tasks.sleeping, 1).co
-          table.insert(tasks.ready, co)
+          table.insert(tasks.ready, { co = co })
           debug_print(names[tostring(co)] .. ' woke up')
           print_ready_tasks()
         end
       end
 
       if #tasks.ready > 0 then
-        local co = table.remove(tasks.ready, 1)
-        resume_task(co)
+        local task = table.remove(tasks.ready, 1)
+        resume_task(task.co, table.unpack(task.args or {}))
       elseif #tasks.sleeping > 0 then
         debug_print('no tasks ready, sleeping for ' .. tasks.sleeping[1].wakeup - _current_msec .. ' msec')
         sleep_msec(tasks.sleeping[1].wakeup - _current_msec)
@@ -100,7 +100,7 @@ local function Scheduler()
   local function spawn(f, name)
     local co = coroutine.create(f)
     names[tostring(co)] = name or tostring(co)
-    table.insert(tasks.ready, co)
+    table.insert(tasks.ready, { co = co })
     debug_print(names[tostring(co)] .. ' spawned')
     print_ready_tasks()
     return co
@@ -109,7 +109,7 @@ local function Scheduler()
   ---@param co thread
   local function destroy(co)
     for i, task in ipairs(tasks.ready) do
-      if task == co then
+      if task.co == co then
         debug_print(names[tostring(co)] .. ' destroyed')
         table.remove(tasks.ready, i)
         return
@@ -126,7 +126,7 @@ local function Scheduler()
 
   local function yield()
     local co = coroutine.running()
-    table.insert(tasks.ready, co)
+    table.insert(tasks.ready, { co = co })
     debug_print(names[tostring(co)] .. ' yielded')
     print_ready_tasks()
     resume_kernel()
@@ -155,8 +155,7 @@ local function Scheduler()
   ---@vararg any
   local function resume(co, ...)
     debug_print(names[tostring(co)] .. ' resumed')
-    -- maybe this should just go into the ready queue with its args
-    resume_task(co, ...)
+    table.insert(tasks.ready, { co = co, args = { ... } })
   end
 
   return {

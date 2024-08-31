@@ -28,5 +28,6 @@ scheduler.sleep(500)
 print('0.2')
 
 scheduler.resume(pause, 'unpaused')
+scheduler.yield()
 
 scheduler.destroy(infinite)
