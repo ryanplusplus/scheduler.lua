@@ -62,16 +62,17 @@ local function Scheduler()
 
   local kernel = coroutine.create(function()
     while true do
-      debug_print('runnign kernel')
-      local _current_msec
+      debug_print('running kernel')
+      local current_msec = current_msec()
 
-      if #tasks.sleeping > 0 then
-        _current_msec = current_msec()
-        if tasks.sleeping[1].wakeup <= _current_msec then
+      for _, task in ipairs(tasks.sleeping) do
+        if task.wakeup <= current_msec then
           local co = table.remove(tasks.sleeping, 1).co
           table.insert(tasks.ready, { co = co })
           debug_print(names[tostring(co)] .. ' woke up')
           print_ready_tasks()
+        else
+          break
         end
       end
 
@@ -79,8 +80,8 @@ local function Scheduler()
         local task = table.remove(tasks.ready, 1)
         resume_task(task.co, table.unpack(task.args or {}))
       elseif #tasks.sleeping > 0 then
-        debug_print('no tasks ready, sleeping for ' .. tasks.sleeping[1].wakeup - _current_msec .. ' msec')
-        sleep_msec(tasks.sleeping[1].wakeup - _current_msec)
+        debug_print('no tasks ready, sleeping for ' .. tasks.sleeping[1].wakeup - current_msec .. ' msec')
+        sleep_msec(tasks.sleeping[1].wakeup - current_msec)
       else
         break
       end
