@@ -22,7 +22,6 @@ end
 local function Scheduler()
   local tasks = {
     ready = {},
-    paused = {},
     sleeping = {}
   }
 
@@ -48,16 +47,16 @@ local function Scheduler()
     ffi.C.usleep(msec * 1000)
   end
 
-  local function resume_task(co)
+  local function resume_task(co, ...)
     debug_print(names[tostring(co)] .. ' status: ' .. coroutine.status(co))
     if coroutine.status(co) == 'suspended' then
       debug_print(names[tostring(co)] .. ' resuming')
       print_ready_tasks()
-      coroutine.resume(co)
+      coroutine.resume(co, ...)
     elseif coroutine.status(co) == 'normal' then
       debug_print(names[tostring(co)] .. ' resuming')
       print_ready_tasks()
-      coroutine.yield(co)
+      coroutine.yield(co, ...)
     end
   end
 
@@ -146,11 +145,27 @@ local function Scheduler()
     resume_kernel()
   end
 
+  local function pause()
+    local co = coroutine.running()
+    debug_print(names[tostring(co)] .. ' paused')
+    return resume_kernel()
+  end
+
+  ---@param co thread
+  ---@vararg any
+  local function resume(co, ...)
+    debug_print(names[tostring(co)] .. ' resumed')
+    -- maybe this should just go into the ready queue with its args
+    resume_task(co, ...)
+  end
+
   return {
     spawn = spawn,
     destroy = destroy,
     yield = yield,
-    sleep = sleep
+    sleep = sleep,
+    pause = pause,
+    resume = resume
   }
 end
 

@@ -12,15 +12,21 @@ scheduler.spawn(function()
   print('2.2')
 end, 'task 2')
 
+local pause = scheduler.spawn(function()
+  print(scheduler.pause())
+end, 'task pause')
+
 local infinite = scheduler.spawn(function()
   while true do
     print('∞')
     scheduler.sleep(100)
   end
-end, 'infinite')
+end, 'task infinite')
 
 print('0.1')
 scheduler.sleep(500)
 print('0.2')
+
+scheduler.resume(pause, 'unpaused')
 
 scheduler.destroy(infinite)
