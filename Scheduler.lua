@@ -128,7 +128,8 @@ local function Scheduler()
     return resume_kernel()
   end
 
-  ---Resumes a coroutine with optional arguments.
+  ---Resumes a coroutine with optional arguments. Arguments are used as return
+  ---values for `pause`.
   ---@param co thread
   ---@vararg any
   local function resume(co, ...)
