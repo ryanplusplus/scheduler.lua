@@ -9,6 +9,21 @@ describe('Scheduler', function()
     return mach.mock_function().may_be_called()
   end
 
+  it('should get the current coroutine', function()
+    local scheduler = Scheduler()
+
+    assert.are.same(coroutine.running(), scheduler.current())
+
+    local spawned_co
+    local co = scheduler.spawn(function()
+      spawned_co = scheduler.current()
+    end)
+
+    scheduler.yield()
+
+    assert.are.same(co, spawned_co)
+  end)
+
   it('should allow the main coroutine to yield', function()
     local scheduler = Scheduler()
     scheduler.yield()

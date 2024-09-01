@@ -65,6 +65,11 @@ local function Scheduler()
     end
   end
 
+  ---@return thread
+  local function current()
+    return (coroutine.running())
+  end
+
   ---@param f function
   local function spawn(f)
     local co = coroutine.create(f)
@@ -117,6 +122,7 @@ local function Scheduler()
   end
 
   return {
+    current = current,
     spawn = spawn,
     destroy = destroy,
     yield = yield,

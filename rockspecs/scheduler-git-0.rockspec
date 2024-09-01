@@ -10,7 +10,7 @@ description = {
   license = 'MIT <http://opensource.org/licenses/MIT>'
 }
 dependencies = {
-  'lua >= 5.1',
+  'lua >= 5.2',
   'cffi-lua ~> 0.2'
 }
 build = {
