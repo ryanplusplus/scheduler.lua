@@ -121,7 +121,7 @@ local function Scheduler()
   end
 
   ---Pauses a coroutine and allows other coroutines to run. The coroutine is
-  ---only resumed when `resume` is called and returns any arguments passed ro
+  ---only resumed when `resume` is called and returns any arguments passed to
   ---`resume`.
   ---@return any
   local function pause()
