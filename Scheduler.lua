@@ -9,6 +9,7 @@ ffi.cdef [[
   int usleep(unsigned int usec);
 ]]
 
+---Creates a new coroutine scheduler.
 local function Scheduler()
   local tasks = {
     ready = {},
@@ -65,11 +66,13 @@ local function Scheduler()
     end
   end
 
+  ---Returns the current coroutine.
   ---@return thread
   local function current()
     return (coroutine.running())
   end
 
+  ---Creates a new coroutine and adds it to the ready queue.
   ---@param f function
   local function spawn(f)
     local co = coroutine.create(f)
@@ -77,6 +80,8 @@ local function Scheduler()
     return co
   end
 
+  ---Removes a coroutine from the scheduler. It is removed from the ready
+  ---queue and will not resume if sleeping.
   ---@param co thread
   local function destroy(co)
     for i, task in ipairs(tasks.ready) do
@@ -93,12 +98,16 @@ local function Scheduler()
     end
   end
 
+  ---Pauses the current coroutine and allows other coroutines to run. The
+  ---coroutine is immediately added to the ready queue.
   local function yield()
     local co = coroutine.running()
     table.insert(tasks.ready, { co = co })
     resume_kernel()
   end
 
+  ---Pauses coroutine for a given number of milliseconds and allows other
+  ---coroutines to run.
   ---@param msec number
   local function sleep(msec)
     table.insert(tasks.sleeping, {
@@ -111,10 +120,15 @@ local function Scheduler()
     resume_kernel()
   end
 
+  ---Pauses a coroutine and allows other coroutines to run. The coroutine is
+  ---only resumed when `resume` is called and returns any arguments passed ro
+  ---`resume`.
+  ---@return any
   local function pause()
     return resume_kernel()
   end
 
+  ---Resumes a coroutine with optional arguments.
   ---@param co thread
   ---@vararg any
   local function resume(co, ...)
