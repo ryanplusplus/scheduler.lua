@@ -1,0 +1,39 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        version: [5.2, 5.3, 5.4]
+
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: ${{ matrix.version }}
+
+      - uses: leafo/gh-actions-luarocks@v4
+
+      - name: install_meson
+        run: |
+          sudo apt install meson
+
+      - name: build
+        run: |
+          luarocks install busted
+          luarocks install mach
+          luarocks install --only-deps rockspecs/scheduler-git-0.rockspec
+
+      - name: test
+        run: |
+          busted
