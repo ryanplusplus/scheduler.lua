@@ -2,7 +2,7 @@ package = 'scheduler'
 version = '1.0-1'
 source = {
   url = 'https://github.com/ryanplusplus/scheduler.lua/archive/v1.0-1.tar.gz',
-  dir = 'scheduler.lua-1.0-1/src'
+  dir = 'scheduler.lua-1.0-1'
 }
 description = {
   summary = 'Simple coroutine scheduler.',
