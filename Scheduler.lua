@@ -30,7 +30,7 @@ local function Scheduler()
     if coroutine.status(co) == 'suspended' then
       coroutine.resume(co, ...)
     elseif coroutine.status(co) == 'normal' then
-      coroutine.yield(co, ...)
+      coroutine.yield(...)
     end
   end
 
@@ -60,7 +60,7 @@ local function Scheduler()
 
   local function resume_kernel()
     if coroutine.status(kernel) == 'suspended' then
-      return coroutine.resume(kernel)
+      return select(2, coroutine.resume(kernel))
     else
       return coroutine.yield()
     end
