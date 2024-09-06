@@ -87,6 +87,18 @@ describe('Scheduler', function()
       end)
   end)
 
+  it('should allow the main coroutine to be paused and resumed', function()
+    local scheduler = Scheduler()
+
+    local co = scheduler.current()
+
+    scheduler.spawn(function()
+      scheduler.resume(co, 5)
+    end)
+
+    assert.are.same(5, scheduler.pause())
+  end)
+
   it('should allow a coroutine to be paused and resumed with arguments', function()
     local scheduler = Scheduler()
 
